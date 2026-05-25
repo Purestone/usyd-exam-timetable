@@ -65,6 +65,25 @@ def build_location(exam: Dict[str, str]) -> str:
     return ", ".join(parts) if parts else "The University of Sydney"
 
 
+def build_description(exam: Dict[str, str], duration_str: str) -> str:
+    description_fields = [
+        ("Building", exam.get("Building", "")),
+        ("Venue", exam.get("Venue", "")),
+        ("Room", exam.get("Room", "")),
+        ("Your Seat", exam.get("Your Seat", "")),
+        ("Map", exam.get("Map", "")),
+        ("Assessment Type", exam.get("Assessment Type", "")),
+        ("Duration", duration_str),
+        ("Writing Time", exam.get("Writing Time", "")),
+        ("Reading Time", exam.get("Reading Time", "")),
+        ("Exam Conditions", exam.get("Exam Conditions", "")),
+        ("Materials Permitted", exam.get("Materials Permitted", "")),
+    ]
+    return "\n\n".join(
+        [f"[{label}] {value}" for label, value in description_fields if value]
+    )
+
+
 def ics_escape(value: str) -> str:
     return (
         value.replace("\\", "\\\\")
@@ -185,19 +204,7 @@ def create_ics(exams: List[Dict[str, str]]) -> str:
         end_dt = start_dt + timedelta(minutes=duration_minutes)
 
         location = build_location(exam)
-
-        description_fields = [
-            ("Assessment Type", exam.get("Assessment Type", "")),
-            ("Duration", duration_str),
-            ("Writing Time", exam.get("Writing Time", "")),
-            ("Reading Time", exam.get("Reading Time", "")),
-            ("Exam Conditions", exam.get("Exam Conditions", "")),
-            ("Materials Permitted", exam.get("Materials Permitted", "")),
-        ]
-        description = "\n\n".join(
-            [f"[{label}] {value}" for label,
-                value in description_fields if value]
-        )
+        description = build_description(exam, duration_str)
 
         uid = f"{uuid4()}@usyd-exam"
         lines.extend(
